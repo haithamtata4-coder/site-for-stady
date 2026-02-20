@@ -41,9 +41,8 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, onOpenCart }) => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <Link to="/" className="text-gray-900 hover:text-brand-yellow font-bold text-sm uppercase tracking-wide transition-colors">{t('home')}</Link>
+            <Link to="/products" className="text-gray-500 hover:text-brand-yellow font-bold text-sm uppercase tracking-wide transition-colors">{t('products')}</Link>
             <Link to="/about-us" className="text-gray-500 hover:text-brand-yellow font-bold text-sm uppercase tracking-wide transition-colors">{t('aboutUs')}</Link>
-            <Link to="/" className="text-gray-500 hover:text-brand-yellow font-bold text-sm uppercase tracking-wide transition-colors">{t('newArrivals')}</Link>
-            <Link to="/" className="text-gray-500 hover:text-brand-yellow font-bold text-sm uppercase tracking-wide transition-colors">{t('sale')}</Link>
           </div>
 
           {/* Icons */}

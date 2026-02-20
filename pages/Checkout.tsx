@@ -2,8 +2,101 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { OrderFormState, CartItem, WilayaData, BaladiyaData } from '../types';
-import { ArrowLeft, ArrowRight, Truck, MapPin, Instagram, CheckCircle, Building2, Home, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Truck, MapPin, Instagram, CheckCircle, Building2, Home, Loader2, Search, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+
+const SearchableSelect = ({ 
+  options, 
+  value, 
+  onChange, 
+  placeholder, 
+  label, 
+  disabled,
+  language 
+}: { 
+  options: { id: number, label: string }[], 
+  value: number, 
+  onChange: (id: number) => void, 
+  placeholder: string,
+  label: string,
+  disabled?: boolean,
+  language: string
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  
+  const selectedOption = options.find(o => o.id === value);
+  const filteredOptions = options.filter(o => 
+    o.label.toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <label className="block text-sm font-bold mb-2 uppercase">{label}</label>
+      <div 
+        className={`w-full bg-gray-50 border border-gray-200 rounded-none p-3 flex justify-between items-center cursor-pointer transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-black'} ${isOpen ? 'border-black ring-1 ring-black' : ''}`}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+      >
+        <span className={selectedOption ? 'text-black font-medium' : 'text-gray-400'}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </div>
+
+      {isOpen && !disabled && (
+        <div className="absolute z-[60] w-full mt-1 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] max-h-64 overflow-hidden flex flex-col">
+          <div className="p-2 border-b border-gray-100 bg-gray-50">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input 
+                type="text"
+                autoFocus
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 focus:border-black outline-none bg-white"
+                placeholder={language === 'ar' ? 'ابحث...' : 'Search...'}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+          <div className="overflow-y-auto flex-1">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map(opt => (
+                <div 
+                  key={opt.id}
+                  className={`p-3 text-sm hover:bg-brand-yellow cursor-pointer transition-colors flex items-center justify-between ${value === opt.id ? 'bg-yellow-50 font-bold' : ''}`}
+                  onClick={() => {
+                    onChange(opt.id);
+                    setIsOpen(false);
+                    setSearch('');
+                  }}
+                >
+                  <span>{opt.label}</span>
+                  {value === opt.id && <CheckCircle className="w-4 h-4 text-black" />}
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-sm text-gray-500 italic">
+                {language === 'ar' ? 'لا توجد نتائج' : 'No results found'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface CheckoutProps {
   cart: CartItem[];
@@ -35,6 +128,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
   // Fetch Wilayas and Baladiyas from Supabase
   useEffect(() => {
@@ -91,7 +185,22 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'phone') {
+      // Only allow numbers
+      const cleaned = value.replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [name]: cleaned }));
+      
+      if (cleaned.length > 0 && cleaned.length < 10) {
+        setPhoneError(language === 'ar' ? 'رقم الهاتف يجب أن يتكون من 10 أرقام' : 'Phone number must be 10 digits');
+      } else if (cleaned.length === 10 && !/^(05|06|07)/.test(cleaned)) {
+        setPhoneError(language === 'ar' ? 'رقم الهاتف غير صالح (يجب أن يبدأ بـ 05، 06 أو 07)' : 'Invalid phone number (must start with 05, 06 or 07)');
+      } else {
+        setPhoneError('');
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleDeliveryChange = (method: 'home' | 'stopdesk') => {
@@ -100,6 +209,18 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Final validation
+    if (formData.phone.length !== 10 || !/^(05|06|07)/.test(formData.phone)) {
+      setPhoneError(language === 'ar' ? 'يرجى إدخال رقم هاتف صالح (10 أرقام)' : 'Please enter a valid phone number (10 digits)');
+      return;
+    }
+
+    if (!formData.wilayaId || !formData.baladiyaId) {
+      setSubmitError(language === 'ar' ? 'يرجى اختيار الولاية والبلدية' : 'Please select Wilaya and Baladiya');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError('');
     
@@ -322,67 +443,50 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
                 </div>
                 <div>
                   <label className="block text-sm font-bold mb-2 uppercase">{t('phone')}</label>
-                  <input 
-                    type="tel" 
-                    name="phone"
-                    required
-                    placeholder="05/06/07..."
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-none p-3 focus:outline-none focus:border-black focus:ring-0"
-                  />
+                  <div className="relative">
+                    <input 
+                      type="tel" 
+                      name="phone"
+                      required
+                      placeholder="05/06/07..."
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className={`w-full bg-gray-50 border ${phoneError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 focus:border-black'} rounded-none p-3 focus:outline-none focus:ring-0 transition-all`}
+                    />
+                    {phoneError && (
+                      <div className="absolute -bottom-6 left-0 text-[10px] text-red-600 font-bold flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" />
+                        {phoneError}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 {/* Wilaya Selector */}
-                <div>
-                  <label className="block text-sm font-bold mb-2 uppercase">{t('wilaya')}</label>
-                  <select 
-                    name="wilayaId"
-                    required
-                    value={formData.wilayaId}
-                    onChange={handleChange}
-                    disabled={loadingLocations}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-none p-3 focus:outline-none focus:border-black focus:ring-0"
-                  >
-                    <option value="">{loadingLocations ? "Loading..." : t('selectWilaya')}</option>
-                    {wilayas.map(w => (
-                      <option key={w.id} value={w.id}>
-                        {w.code} - {language === 'ar' ? w.nameAr : w.nameEn}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SearchableSelect 
+                  label={t('wilaya')}
+                  placeholder={loadingLocations ? "Loading..." : t('selectWilaya')}
+                  options={wilayas.map(w => ({ id: w.id, label: `${w.code} - ${language === 'ar' ? w.nameAr : w.nameEn}` }))}
+                  value={formData.wilayaId}
+                  onChange={(id) => {
+                    setFormData(prev => ({ ...prev, wilayaId: id, baladiyaId: 0 }));
+                  }}
+                  disabled={loadingLocations}
+                  language={language}
+                />
 
-                {/* Baladiya Selector (Dynamic) */}
-                <div className={formData.deliveryMethod === 'home' ? '' : 'sm:col-span-2'}>
-                  <label className="block text-sm font-bold mb-2 uppercase">{t('baladiya')}</label>
-                  {filteredBaladiyas.length > 0 ? (
-                      <select 
-                        name="baladiyaId"
-                        required
-                        value={formData.baladiyaId}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-none p-3 focus:outline-none focus:border-black focus:ring-0"
-                      >
-                        <option value="">Select Baladiya</option>
-                        {filteredBaladiyas.map(b => (
-                            <option key={b.id} value={b.id}>
-                                {language === 'ar' ? b.nameAr : b.nameEn}
-                            </option>
-                        ))}
-                      </select>
-                  ) : (
-                    <input 
-                        type="text" 
-                        name="baladiya" 
-                        required={filteredBaladiyas.length === 0}
-                        placeholder={t('baladiya')}
-                        disabled
-                        className="w-full bg-gray-100 border border-gray-200 rounded-none p-3 focus:outline-none cursor-not-allowed"
-                        value={formData.wilayaId ? "No Baladiyas found" : t('selectWilaya')}
-                    />
-                  )}
-                </div>
+                {/* Baladiya Selector */}
+                <SearchableSelect 
+                  label={t('baladiya')}
+                  placeholder={formData.wilayaId ? "Select Baladiya" : t('selectWilaya')}
+                  options={filteredBaladiyas.map(b => ({ id: b.id, label: language === 'ar' ? b.nameAr : b.nameEn || b.nameAr }))}
+                  value={formData.baladiyaId}
+                  onChange={(id) => {
+                    setFormData(prev => ({ ...prev, baladiyaId: id }));
+                  }}
+                  disabled={!formData.wilayaId || filteredBaladiyas.length === 0}
+                  language={language}
+                />
 
                 {/* Conditional Address Field */}
                 {formData.deliveryMethod === 'home' && (

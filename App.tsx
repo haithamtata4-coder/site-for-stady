@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import ProductsPage from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
 import Checkout from './pages/Checkout';
 import About from './pages/About';
@@ -135,6 +136,7 @@ function AppContent() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home products={products} categories={categories} />} />
+            <Route path="/products" element={<ProductsPage products={products} categories={categories} />} />
             <Route path="/product/:id" element={<ProductDetails products={products} onAddToCart={addToCart} />} />
             <Route path="/checkout" element={
               <Checkout 

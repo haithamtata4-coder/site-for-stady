@@ -74,7 +74,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ products, onAddToCart }
 
     const stock = getStock(selectedSize, selectedColor);
     if (quantity > stock) {
-        setError(`Only ${stock} items available in this option`);
+        setError(language === 'ar' ? 'الكمية المطلوبة غير متوفرة' : 'Requested quantity not available');
         return;
     }
 
@@ -84,22 +84,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ products, onAddToCart }
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : section);
-  };
-
-  const getColorClass = (color: string) => {
-    const safeColor = color.toLowerCase();
-    switch(safeColor) {
-      case 'black': return 'bg-black';
-      case 'white': return 'bg-white border-gray-300';
-      case 'yellow': return 'bg-yellow-400';
-      case 'gray': return 'bg-gray-500';
-      case 'green': return 'bg-green-600';
-      case 'khaki': return 'bg-[#C3B091]';
-      case 'blue': return 'bg-blue-600';
-      case 'navy': return 'bg-blue-900';
-      case 'red': return 'bg-red-600';
-      default: return 'bg-gray-200';
-    }
   };
 
   const productName = language === 'ar' ? product.nameAr : product.nameEn;
@@ -203,7 +187,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ products, onAddToCart }
                         {t('color')}: <span className="text-gray-500 font-normal">{selectedColor}</span>
                         {!selectedSize && <span className="text-xs text-red-500 normal-case mx-2">({t('selectOptionsError')})</span>}
                     </label>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                         {uniqueColors.map((color) => {
                             const variant = selectedSize ? getVariant(selectedSize, color) : null;
                             const stock = variant ? variant.quantity : 0;
@@ -219,15 +203,14 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ products, onAddToCart }
                                         setError('');
                                     }}
                                     className={`
-                                        relative w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all
-                                        ${selectedColor === color ? 'border-black ring-2 ring-offset-2 ring-gray-200' : 'border-gray-200 hover:border-gray-400'}
-                                        ${getColorClass(color)}
-                                        ${(!selectedSize || !isAvailable) && selectedSize ? 'opacity-20 cursor-not-allowed' : ''}
+                                        h-12 flex items-center justify-center font-bold text-sm uppercase transition-all border-2
+                                        ${selectedColor === color 
+                                            ? 'bg-black text-white border-black' 
+                                            : 'bg-white text-black border-gray-200 hover:border-black'}
+                                        ${(!selectedSize || !isAvailable) && selectedSize ? 'opacity-40 cursor-not-allowed bg-gray-50 line-through' : ''}
                                     `}
                                 >
-                                    {selectedColor === color && (
-                                        <Check className={`w-4 h-4 ${color === 'white' || color === 'yellow' ? 'text-black' : 'text-white'}`} />
-                                    )}
+                                    {color}
                                 </button>
                             );
                         })}
@@ -258,7 +241,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ products, onAddToCart }
                      </div>
                      {selectedSize && selectedColor && (
                         <div className={`text-sm font-bold uppercase py-2 px-3 border ${currentStock < 5 ? 'border-red-200 bg-red-50 text-red-600' : 'border-green-200 bg-green-50 text-green-700'}`}>
-                            {currentStock > 0 ? `${currentStock} In Stock` : 'Out of Stock'}
+                            {currentStock > 0 ? (language === 'ar' ? 'متوفر' : 'In Stock') : (language === 'ar' ? 'غير متوفر' : 'Out of Stock')}
                         </div>
                      )}
                 </div>
