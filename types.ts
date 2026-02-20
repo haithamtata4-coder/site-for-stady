@@ -1,0 +1,64 @@
+
+export interface ProductVariant {
+  id: string;
+  size: string;
+  color: string;
+  quantity: number; // Stock quantity for this specific combo
+  sku?: string;
+}
+
+export interface Category {
+  id: number;
+  nameEn: string;
+  nameAr: string;
+  image: string;
+}
+
+export interface Product {
+  id: number;
+  categoryId?: number; // Optional to handle old data if any, but ideally required
+  nameEn: string;
+  nameAr: string;
+  price: number; // Current selling price (Sale Price)
+  originalPrice?: number; // Original price (if discount exists)
+  image: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  variants: ProductVariant[];
+  category: string; // Keeping for display fallback, derived from categoryId in new logic
+}
+
+export interface CartItem extends Product {
+  selectedVariantId: string;
+  selectedSize: string;
+  selectedColor: string;
+  quantity: number;
+  cartId: string;
+}
+
+export interface WilayaData {
+  id: number;
+  code: string;
+  nameAr: string;
+  nameEn: string; // Transliterated or kept same if not available
+  deliveryPriceHome: number;
+  deliveryPriceDesk: number; // Stop Desk
+}
+
+export interface BaladiyaData {
+  id: number;
+  wilayaId: number;
+  nameAr: string;
+  nameEn?: string;
+}
+
+export interface OrderFormState {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  wilayaId: number;
+  baladiyaId: number;
+  instagram?: string;
+  deliveryMethod: 'home' | 'stopdesk';
+  address?: string;
+}

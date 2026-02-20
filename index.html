@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YourTshirtDZ2 | Fashion Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                yellow: '#FFD700', // Gold/Yellow from logo
+                black: '#111111',
+                gray: '#F5F5F5',
+              }
+            },
+            fontFamily: {
+              sans: ['Oswald', 'Cairo', 'sans-serif'], // Added Oswald as primary, Cairo for Arabic fallback
+            },
+            borderRadius: {
+              'none': '0',
+              'sm': '0.125rem',
+              DEFAULT: '0', // Default to sharp corners
+              'md': '0',
+              'lg': '0',
+              'xl': '0',
+              '2xl': '0',
+              '3xl': '0',
+              'full': '9999px', // Keep full for circles only if explicitly needed
+            },
+            animation: {
+              marquee: 'marquee 25s linear infinite',
+            },
+            keyframes: {
+              marquee: {
+                '0%': { transform: 'translateX(0%)' },
+                '100%': { transform: 'translateX(-100%)' },
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      /* Custom scrollbar for better aesthetics */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 0px; /* Sharp scrollbar */
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+      
+      /* Ensure Arabic text uses Cairo if needed overrides */
+      :lang(ar) {
+        font-family: 'Cairo', 'Oswald', sans-serif;
+      }
+
+      /* Reverse marquee for RTL */
+      :lang(ar) .animate-marquee {
+        animation-direction: reverse;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.574.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.97.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-white text-brand-black antialiased selection:bg-brand-yellow selection:text-black">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
