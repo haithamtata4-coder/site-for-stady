@@ -88,6 +88,7 @@ CREATE TABLE public.orders (
     phone VARCHAR(20) NOT NULL,
     wilaya_id INTEGER REFERENCES public.wilayas(id),
     baladiya_id INTEGER REFERENCES public.baladiyas(id),
+    custom_baladiya VARCHAR(255),
     address TEXT,
     instagram_handle VARCHAR(100),
     delivery_method VARCHAR(50) CHECK (delivery_method IN ('home', 'stopdesk')),

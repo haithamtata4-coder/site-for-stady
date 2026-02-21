@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { OrderFormState, CartItem, WilayaData, BaladiyaData } from '../types';
+import { OrderFormState, CartItem, WilayaData } from '../types';
 import { ArrowLeft, ArrowRight, Truck, MapPin, Instagram, CheckCircle, Building2, Home, Loader2, Search, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { motion } from 'motion/react';
 
 const SearchableSelect = ({ 
   options, 
@@ -114,14 +115,13 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
     lastName: '',
     phone: '',
     wilayaId: 0,
-    baladiyaId: 0,
+    baladiya: '',
     instagram: '',
     deliveryMethod: 'stopdesk',
     address: ''
   });
   
   const [wilayas, setWilayas] = useState<WilayaData[]>([]);
-  const [baladiyas, setBaladiyas] = useState<BaladiyaData[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(true);
 
   const [deliveryPrice, setDeliveryPrice] = useState(0);
@@ -130,12 +130,11 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
   const [submitError, setSubmitError] = useState('');
   const [phoneError, setPhoneError] = useState('');
 
-  // Fetch Wilayas and Baladiyas from Supabase
+  // Fetch Wilayas from Supabase
   useEffect(() => {
     const fetchLocations = async () => {
         try {
             const { data: wilayasData } = await supabase.from('wilayas').select('*').order('code');
-            const { data: baladiyasData } = await supabase.from('baladiyas').select('*').order('name_ar');
             
             if (wilayasData) {
                 setWilayas(wilayasData.map(w => ({
@@ -147,14 +146,6 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
                     deliveryPriceDesk: w.delivery_price_desk
                 })));
             }
-            if (baladiyasData) {
-                setBaladiyas(baladiyasData.map(b => ({
-                    id: b.id,
-                    wilayaId: b.wilaya_id,
-                    nameAr: b.name_ar,
-                    nameEn: b.name_en || b.name_ar
-                })));
-            }
         } catch (err) {
             console.error("Error fetching locations", err);
         } finally {
@@ -163,9 +154,6 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
     };
     fetchLocations();
   }, []);
-
-  // Filter baladiyas based on selected wilaya
-  const filteredBaladiyas = baladiyas.filter(b => b.wilayaId === Number(formData.wilayaId));
 
   // Recalculate delivery price when Wilaya or Method changes
   useEffect(() => {
@@ -216,8 +204,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
       return;
     }
 
-    if (!formData.wilayaId || !formData.baladiyaId) {
-      setSubmitError(language === 'ar' ? 'يرجى اختيار الولاية والبلدية' : 'Please select Wilaya and Baladiya');
+    if (!formData.wilayaId || !formData.baladiya) {
+      setSubmitError(language === 'ar' ? 'يرجى اختيار الولاية وكتابة البلدية' : 'Please select Wilaya and type Baladiya');
       return;
     }
 
@@ -233,7 +221,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
                 last_name: formData.lastName,
                 phone: formData.phone,
                 wilaya_id: Number(formData.wilayaId),
-                baladiya_id: Number(formData.baladiyaId),
+                baladiya_id: null,
+                custom_baladiya: formData.baladiya,
                 address: formData.address,
                 instagram_handle: formData.instagram,
                 delivery_method: formData.deliveryMethod,
@@ -268,7 +257,16 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
         }
     } catch (err: any) {
         console.error("Order submission error:", err);
-        setSubmitError(err.message || "Failed to submit order. Please try again.");
+        let errorMsg = err.message || "Failed to submit order. Please try again.";
+        
+        // Specific help for the missing column error
+        if (errorMsg.includes('custom_baladiya')) {
+          errorMsg = language === 'ar' 
+            ? "خطأ في قاعدة البيانات: يرجى تشغيل أمر SQL في Supabase لإضافة عمود 'custom_baladiya'."
+            : "Database Error: Please run the SQL command in Supabase to add the 'custom_baladiya' column.";
+        }
+        
+        setSubmitError(errorMsg);
     } finally {
         setIsSubmitting(false);
     }
@@ -280,20 +278,40 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
       .replace('{phone}', formData.phone);
 
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
-        <div className="bg-green-100 p-6 rounded-full mb-6 animate-bounce">
-          <CheckCircle className="w-16 h-16 text-green-600" />
-        </div>
-        <h2 className="text-3xl font-black mb-4 uppercase">{t('successTitle')}</h2>
-        <p className="text-gray-600 max-w-md mb-8">
-          {successMsg}
-        </p>
-        <button 
-          onClick={() => navigate('/')}
-          className="bg-black text-white px-8 py-3 rounded-none font-bold hover:bg-gray-800 transition-colors uppercase"
+      <div className="min-h-[80vh] flex flex-col items-center justify-start pt-12 md:pt-20 px-4 text-center bg-gray-50">
+        <motion.div 
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="bg-brand-yellow p-6 md:p-8 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-8 md:mb-12"
         >
-          {t('backToStore')}
-        </button>
+          <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-black" />
+        </motion.div>
+        
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="w-full max-w-2xl"
+        >
+          <h2 className="text-5xl md:text-8xl font-black mb-8 uppercase tracking-tighter leading-[0.85] md:leading-[0.8]">
+            {language === 'ar' ? 'تم استلام' : 'ORDER'} <br />
+            <span className="text-brand-yellow bg-black px-4 inline-block mt-2">{language === 'ar' ? 'طلبك بنجاح!' : 'RECEIVED!'}</span>
+          </h2>
+          
+          <div className="max-w-md mx-auto bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-12">
+            <p className="text-lg md:text-xl font-bold leading-relaxed">
+              {successMsg}
+            </p>
+          </div>
+
+          <button 
+            onClick={() => navigate('/')}
+            className="group relative inline-flex items-center gap-4 bg-black text-white px-10 md:px-14 py-4 md:py-6 font-black text-lg md:text-2xl uppercase tracking-wider hover:bg-brand-yellow hover:text-black transition-all duration-300 shadow-[8px_8px_0px_0px_rgba(255,215,0,0.5)] active:translate-y-1 active:shadow-none"
+          >
+            {t('backToStore')}
+            <ArrowIcon className="w-6 h-6 md:w-8 md:h-8 transition-transform group-hover:translate-x-2 rtl:group-hover:-translate-x-2" />
+          </button>
+        </motion.div>
       </div>
     );
   }
@@ -328,7 +346,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
               {cart.map(item => (
                 <div key={item.cartId} className="flex gap-3 text-sm">
                   <div className="w-12 h-12 bg-white rounded-none overflow-hidden flex-shrink-0 border border-gray-200">
-                    <img src={item.image} alt={language === 'ar' ? item.nameAr : item.nameEn} className="w-full h-full object-cover" />
+                    <img src={item.image || null} alt={language === 'ar' ? item.nameAr : item.nameEn} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1">
                     <p className="font-bold line-clamp-1 uppercase">{language === 'ar' ? item.nameAr : item.nameEn}</p>
@@ -469,24 +487,25 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, total, onClearCart }) => {
                   options={wilayas.map(w => ({ id: w.id, label: `${w.code} - ${language === 'ar' ? w.nameAr : w.nameEn}` }))}
                   value={formData.wilayaId}
                   onChange={(id) => {
-                    setFormData(prev => ({ ...prev, wilayaId: id, baladiyaId: 0 }));
+                    setFormData(prev => ({ ...prev, wilayaId: id, baladiya: '' }));
                   }}
                   disabled={loadingLocations}
                   language={language}
                 />
 
-                {/* Baladiya Selector */}
-                <SearchableSelect 
-                  label={t('baladiya')}
-                  placeholder={formData.wilayaId ? "Select Baladiya" : t('selectWilaya')}
-                  options={filteredBaladiyas.map(b => ({ id: b.id, label: language === 'ar' ? b.nameAr : b.nameEn || b.nameAr }))}
-                  value={formData.baladiyaId}
-                  onChange={(id) => {
-                    setFormData(prev => ({ ...prev, baladiyaId: id }));
-                  }}
-                  disabled={!formData.wilayaId || filteredBaladiyas.length === 0}
-                  language={language}
-                />
+                {/* Baladiya Input */}
+                <div>
+                  <label className="block text-sm font-bold mb-2 uppercase">{t('baladiya')}</label>
+                  <input 
+                    type="text" 
+                    name="baladiya"
+                    required
+                    placeholder={language === 'ar' ? 'اكتب اسم البلدية هنا' : 'Type municipality name'}
+                    value={formData.baladiya}
+                    onChange={handleChange}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-none p-3 focus:outline-none focus:border-black focus:ring-0"
+                  />
+                </div>
 
                 {/* Conditional Address Field */}
                 {formData.deliveryMethod === 'home' && (

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { Product, Category } from '../types';
-import { ArrowRight, ArrowLeft, Filter, X } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface ProductsPageProps {
@@ -10,23 +10,19 @@ interface ProductsPageProps {
 }
 
 const ProductsPage: React.FC<ProductsPageProps> = ({ products, categories }) => {
-  const { t, language, dir } = useLanguage();
-  const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
+  const { t, language } = useLanguage();
+  const { categoryId } = useParams();
   
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const selectedCategoryId = categoryId ? Number(categoryId) : null;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    if (selectedCategoryId === null) {
-      setFilteredProducts(products);
-    } else {
-      setFilteredProducts(products.filter(p => p.categoryId === selectedCategoryId));
-    }
+  const filteredProducts = useMemo(() => {
+    if (selectedCategoryId === null) return products;
+    return products.filter(p => p.categoryId === selectedCategoryId);
   }, [selectedCategoryId, products]);
 
   return (
@@ -53,20 +49,20 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, categories }) => 
               </h3>
               
               <div className="space-y-2">
-                <button 
-                  onClick={() => setSelectedCategoryId(null)}
-                  className={`w-full text-start px-4 py-3 font-bold uppercase transition-colors border-l-4 ${selectedCategoryId === null ? 'border-brand-yellow bg-gray-50 text-black' : 'border-transparent text-gray-500 hover:text-black hover:bg-gray-50'}`}
+                <Link 
+                  to="/products"
+                  className={`w-full block text-start px-4 py-3 font-bold uppercase transition-colors border-l-4 ${selectedCategoryId === null ? 'border-brand-yellow bg-gray-50 text-black' : 'border-transparent text-gray-500 hover:text-black hover:bg-gray-50'}`}
                 >
                   {t('viewAll')}
-                </button>
+                </Link>
                 {categories.map(cat => (
-                  <button 
+                  <Link 
                     key={cat.id}
-                    onClick={() => setSelectedCategoryId(cat.id)}
-                    className={`w-full text-start px-4 py-3 font-bold uppercase transition-colors border-l-4 ${selectedCategoryId === cat.id ? 'border-brand-yellow bg-gray-50 text-black' : 'border-transparent text-gray-500 hover:text-black hover:bg-gray-50'}`}
+                    to={`/category/${cat.id}`}
+                    className={`w-full block text-start px-4 py-3 font-bold uppercase transition-colors border-l-4 ${selectedCategoryId === cat.id ? 'border-brand-yellow bg-gray-50 text-black' : 'border-transparent text-gray-500 hover:text-black hover:bg-gray-50'}`}
                   >
                     {language === 'ar' ? cat.nameAr : cat.nameEn}
-                  </button>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -84,20 +80,22 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, categories }) => 
             
             {isFilterOpen && (
               <div className="mt-4 grid grid-cols-2 gap-2 animate-fadeIn">
-                <button 
-                  onClick={() => { setSelectedCategoryId(null); setIsFilterOpen(false); }}
-                  className={`p-3 text-sm font-bold uppercase border-2 ${selectedCategoryId === null ? 'border-brand-yellow bg-yellow-50' : 'border-gray-200'}`}
+                <Link 
+                  to="/products"
+                  onClick={() => setIsFilterOpen(false)}
+                  className={`p-3 text-center text-sm font-bold uppercase border-2 ${selectedCategoryId === null ? 'border-brand-yellow bg-yellow-50' : 'border-gray-200'}`}
                 >
                   {t('viewAll')}
-                </button>
+                </Link>
                 {categories.map(cat => (
-                  <button 
+                  <Link 
                     key={cat.id}
-                    onClick={() => { setSelectedCategoryId(cat.id); setIsFilterOpen(false); }}
-                    className={`p-3 text-sm font-bold uppercase border-2 ${selectedCategoryId === cat.id ? 'border-brand-yellow bg-yellow-50' : 'border-gray-200'}`}
+                    to={`/category/${cat.id}`}
+                    onClick={() => setIsFilterOpen(false)}
+                    className={`p-3 text-center text-sm font-bold uppercase border-2 ${selectedCategoryId === cat.id ? 'border-brand-yellow bg-yellow-50' : 'border-gray-200'}`}
                   >
                     {language === 'ar' ? cat.nameAr : cat.nameEn}
-                  </button>
+                  </Link>
                 ))}
               </div>
             )}
@@ -127,7 +125,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, categories }) => 
                   <Link to={`/product/${product.id}`} key={product.id} className="group cursor-pointer">
                     <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden mb-4 border-2 border-transparent group-hover:border-black transition-all duration-300">
                       <img 
-                        src={product.image} 
+                        src={product.image || null} 
                         alt={language === 'ar' ? product.nameAr : product.nameEn} 
                         className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                       />

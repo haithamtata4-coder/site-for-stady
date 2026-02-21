@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Product, Category } from '../types';
-import { ArrowRight, ArrowLeft, Star, TrendingUp, Filter } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Star, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion } from 'motion/react';
 
@@ -13,30 +13,10 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ products, categories }) => {
   const { t, language, dir } = useLanguage();
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
 
-  // Update filtered products when products prop changes or category selection changes
-  useEffect(() => {
-    if (selectedCategoryId === null) {
-      setFilteredProducts(products);
-    } else {
-      setFilteredProducts(products.filter(p => p.categoryId === selectedCategoryId));
-    }
-  }, [selectedCategoryId, products]);
-
-  const handleCategoryClick = (id: number) => {
-    if (selectedCategoryId === id) {
-      setSelectedCategoryId(null); // Toggle off if already selected
-    } else {
-      setSelectedCategoryId(id);
-      // Scroll to products section
-      const productsSection = document.getElementById('products');
-      if (productsSection) {
-        productsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
+  const filteredProducts = useMemo(() => {
+    return products; // Home page shows all or featured, but here it was used for filtering which we moved to separate pages
+  }, [products]);
 
   return (
     <div className="pb-20">
@@ -46,14 +26,14 @@ const Home: React.FC<HomeProps> = ({ products, categories }) => {
         <div className="absolute inset-0 z-0 pointer-events-none bg-black">
           {/* Fallback Image (visible while video loads or if video fails) */}
           <img 
-            src="https://images.unsplash.com/photo-1523396870176-237e77b407bc?auto=format&fit=crop&q=80&w=2000" 
+            src={"https://images.unsplash.com/photo-1523396870176-237e77b407bc?auto=format&fit=crop&q=80&w=2000"} 
             alt="Hero Background" 
             className="absolute inset-0 w-full h-full object-cover opacity-50"
           />
           
           {/* Cloudinary Video Iframe */}
           <iframe
-            src="https://player.cloudinary.com/embed/?cloud_name=dua3y4qmf&public_id=PinDown.io__conrable_1771477496_mxuiwe&autoplay=true&muted=true&loop=true&controls=false&hide_controls=true"
+            src={"https://player.cloudinary.com/embed/?cloud_name=dua3y4qmf&public_id=PinDown.io__conrable_1771477496_mxuiwe&autoplay=true&muted=true&loop=true&controls=false&hide_controls=true"}
             className="absolute inset-0 w-full h-full object-cover opacity-80"
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             allowFullScreen
@@ -153,28 +133,27 @@ const Home: React.FC<HomeProps> = ({ products, categories }) => {
            ) : (
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 border-4 border-black bg-black">
                   {categories.map((cat, index) => (
-                      <motion.div 
-                        key={cat.id} 
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        whileHover={{ 
-                          scale: 0.98,
-                          transition: { duration: 0.4, ease: [0.25, 1, 0.5, 1] }
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: index * 0.1, duration: 0.8, ease: "easeOut" }}
-                        onClick={() => handleCategoryClick(cat.id)}
-                        className={`group relative aspect-[3/4] cursor-pointer overflow-hidden border border-black bg-white transition-colors duration-500 ${selectedCategoryId === cat.id ? 'bg-brand-yellow' : ''}`}
-                      >
+                      <Link to={`/category/${cat.id}`} key={cat.id} className="block">
+                        <motion.div 
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          whileHover={{ 
+                            scale: 0.98,
+                            transition: { duration: 0.4, ease: [0.25, 1, 0.5, 1] }
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: index * 0.1, duration: 0.8, ease: "easeOut" }}
+                          className={`group relative aspect-[3/4] cursor-pointer overflow-hidden border border-black bg-white transition-colors duration-500`}
+                        >
                          {/* Image with Grayscale to Color effect */}
                          <motion.img 
-                            src={cat.image} 
+                            src={cat.image || null} 
                             alt={language === 'ar' ? cat.nameAr : cat.nameEn} 
                             initial={{ scale: 1.2 }}
                             whileHover={{ scale: 1 }}
                             transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
-                            className={`w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 ${selectedCategoryId === cat.id ? 'grayscale-0 opacity-40' : 'opacity-90 group-hover:opacity-100'}`} 
+                            className={`w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 opacity-90 group-hover:opacity-100`} 
                          />
                          
                          {/* Luxurious Shine Effect */}
@@ -192,15 +171,6 @@ const Home: React.FC<HomeProps> = ({ products, categories }) => {
                                >
                                  0{index + 1}
                                </motion.span>
-                               {selectedCategoryId === cat.id && (
-                                 <motion.div 
-                                   initial={{ scale: 0 }}
-                                   animate={{ scale: 1 }}
-                                   className="bg-black text-brand-yellow p-3 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]"
-                                 >
-                                   <Filter className="w-5 h-5" />
-                                 </motion.div>
-                               )}
                             </div>
 
                             <div className="relative z-10">
@@ -227,6 +197,7 @@ const Home: React.FC<HomeProps> = ({ products, categories }) => {
                          {/* Hover Overlay Line */}
                          <div className="absolute bottom-0 left-0 w-full h-0 bg-brand-yellow group-hover:h-3 transition-all duration-500 ease-[0.25, 1, 0.5, 1]"></div>
                       </motion.div>
+                    </Link>
                   ))}
                </div>
            )}
@@ -270,38 +241,19 @@ const Home: React.FC<HomeProps> = ({ products, categories }) => {
       <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 min-h-[600px]">
         <div className="flex items-end justify-between mb-16">
           <div>
-            <div className="flex items-center gap-4 mb-2">
-                {selectedCategoryId && (
-                   <button 
-                     onClick={() => setSelectedCategoryId(null)}
-                     className="bg-black text-white px-3 py-1 text-sm font-bold uppercase flex items-center gap-2 hover:bg-gray-800"
-                   >
-                       <Filter className="w-3 h-3" />
-                       Clear Filter
-                   </button>
-                )}
-            </div>
             <h2 className="text-5xl md:text-6xl font-black mb-2 uppercase tracking-tighter text-black outline-text">
-              {selectedCategoryId 
-                  ? categories.find(c => c.id === selectedCategoryId)?.[language === 'ar' ? 'nameAr' : 'nameEn'] 
-                  : t('featuredProducts')}
+              {t('featuredProducts')}
             </h2>
             <div className="h-4 w-32 bg-brand-yellow"></div>
           </div>
-          <Link to="/" onClick={() => setSelectedCategoryId(null)} className="hidden md:flex text-black hover:text-brand-yellow font-black items-center gap-2 uppercase text-lg tracking-wide border-b-2 border-black pb-1 hover:border-brand-yellow transition-colors">
+          <Link to="/products" className="hidden md:flex text-black hover:text-brand-yellow font-black items-center gap-2 uppercase text-lg tracking-wide border-b-2 border-black pb-1 hover:border-brand-yellow transition-colors">
             {t('viewAll')} <ArrowIcon className="w-5 h-5" />
           </Link>
         </div>
 
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20 border-2 border-dashed border-gray-200">
-            <p className="text-gray-500 font-bold uppercase text-xl">No products found in this category.</p>
-            <button 
-                onClick={() => setSelectedCategoryId(null)}
-                className="mt-4 text-brand-yellow font-black uppercase hover:underline"
-            >
-                View all products
-            </button>
+            <p className="text-gray-500 font-bold uppercase text-xl">No products found.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-16 sm:gap-x-8">
@@ -309,7 +261,7 @@ const Home: React.FC<HomeProps> = ({ products, categories }) => {
               <Link to={`/product/${product.id}`} key={product.id} className="group cursor-pointer">
                 <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden mb-6 border-2 border-transparent group-hover:border-black transition-all duration-300">
                   <img 
-                    src={product.image} 
+                    src={product.image || null} 
                     alt={language === 'ar' ? product.nameAr : product.nameEn} 
                     className="w-full h-full object-cover transition-all duration-500"
                   />
@@ -344,7 +296,7 @@ const Home: React.FC<HomeProps> = ({ products, categories }) => {
         
         {/* Mobile View All */}
         <div className="mt-12 md:hidden text-center">
-             <Link to="/" onClick={() => setSelectedCategoryId(null)} className="inline-flex text-black border-2 border-black px-8 py-3 font-black items-center gap-2 uppercase text-lg tracking-wide hover:bg-black hover:text-white transition-colors">
+             <Link to="/products" className="inline-flex text-black border-2 border-black px-8 py-3 font-black items-center gap-2 uppercase text-lg tracking-wide hover:bg-black hover:text-white transition-colors">
             {t('viewAll')} <ArrowIcon className="w-5 h-5" />
           </Link>
         </div>

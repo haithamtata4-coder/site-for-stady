@@ -71,7 +71,7 @@ export interface OrderFormState {
   lastName: string;
   phone: string;
   wilayaId: number;
-  baladiyaId: number;
+  baladiya: string;
   instagram?: string;
   deliveryMethod: 'home' | 'stopdesk';
   address?: string;

@@ -139,6 +139,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home products={products} categories={categories} />} />
             <Route path="/products" element={<ProductsPage products={products} categories={categories} />} />
+            <Route path="/category/:categoryId" element={<ProductsPage products={products} categories={categories} />} />
             <Route path="/product/:id" element={<ProductDetails products={products} onAddToCart={addToCart} />} />
             <Route path="/checkout" element={
               <Checkout 

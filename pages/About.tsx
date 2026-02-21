@@ -30,7 +30,7 @@ const About = () => {
             {/* Brand Story */}
             <div className="flex flex-col md:flex-row gap-12 items-center mb-16">
                 <div className="w-full md:w-1/3 flex justify-center">
-                    <img src={settings?.aboutLogo || settings?.siteLogo || LOGO_URL} alt="Logo" className="w-64 h-64 object-cover rounded-full border-4 border-brand-yellow shadow-xl" />
+                    <img src={settings?.aboutLogo || settings?.siteLogo || LOGO_URL || null} alt="Logo" className="w-64 h-64 object-cover rounded-full border-4 border-brand-yellow shadow-xl" />
                 </div>
                 <div className="w-full md:w-2/3">
                     <h2 className="text-4xl font-black uppercase mb-6 flex items-center gap-3">
@@ -63,7 +63,7 @@ const About = () => {
                     <div className="relative w-full h-80 bg-gray-200 border-2 border-black group overflow-hidden">
                         {settings?.storeLocationUrl ? (
                             <iframe 
-                                src={settings.storeLocationUrl}
+                                src={settings.storeLocationUrl || null}
                                 className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500"
                                 allowFullScreen={true}
                                 loading="lazy"
