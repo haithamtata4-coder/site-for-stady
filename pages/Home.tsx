@@ -133,37 +133,100 @@ const Home: React.FC<HomeProps> = ({ products, categories }) => {
       </section>
 
       {/* Category Section */}
-      <section id="categories" className="py-20 bg-gray-50">
+      <section id="categories" className="py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-           <div className="flex items-center gap-4 mb-12">
-              <div className="w-4 h-12 bg-black"></div>
-              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter">
-                {language === 'ar' ? 'تسوق حسب الصنف' : 'SHOP BY CATEGORY'}
-              </h2>
+           <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+              <div className="relative">
+                <div className="absolute -top-10 -left-6 text-[120px] font-black text-black/5 select-none leading-none">01</div>
+                <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-[0.8] relative z-10">
+                  {language === 'ar' ? 'الأصناف' : 'CATEGORIES'}
+                </h2>
+                <div className="h-4 w-full bg-brand-yellow mt-4"></div>
+              </div>
+              <p className="text-black font-black max-w-xs md:text-end uppercase text-xs tracking-widest leading-relaxed border-r-4 border-black pr-4 rtl:border-r-0 rtl:border-l-4 rtl:pl-4">
+                {language === 'ar' ? 'اختر مجموعتك المفضلة وابدأ التسوق الآن' : 'SELECT YOUR VIBE. EXPLORE OUR CURATED STREETWEAR COLLECTIONS.'}
+              </p>
            </div>
            
            {categories.length === 0 ? (
-               <div className="text-center py-10 text-gray-500 font-bold uppercase">Loading Categories...</div>
+               <div className="text-center py-20 border-4 border-black border-dashed text-black font-black uppercase tracking-widest">Loading...</div>
            ) : (
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {categories.map((cat) => (
-                      <div 
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 border-4 border-black bg-black">
+                  {categories.map((cat, index) => (
+                      <motion.div 
                         key={cat.id} 
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        whileHover={{ 
+                          scale: 0.98,
+                          transition: { duration: 0.4, ease: [0.25, 1, 0.5, 1] }
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1, duration: 0.8, ease: "easeOut" }}
                         onClick={() => handleCategoryClick(cat.id)}
-                        className={`group relative aspect-square cursor-pointer overflow-hidden border-2 transition-all duration-300 ${selectedCategoryId === cat.id ? 'border-brand-yellow ring-4 ring-brand-yellow/30' : 'border-transparent hover:border-black'}`}
+                        className={`group relative aspect-[3/4] cursor-pointer overflow-hidden border border-black bg-white transition-colors duration-500 ${selectedCategoryId === cat.id ? 'bg-brand-yellow' : ''}`}
                       >
-                         <img 
+                         {/* Image with Grayscale to Color effect */}
+                         <motion.img 
                             src={cat.image} 
                             alt={language === 'ar' ? cat.nameAr : cat.nameEn} 
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                            initial={{ scale: 1.2 }}
+                            whileHover={{ scale: 1 }}
+                            transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+                            className={`w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 ${selectedCategoryId === cat.id ? 'grayscale-0 opacity-40' : 'opacity-90 group-hover:opacity-100'}`} 
                          />
-                         <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
-                         <div className="absolute bottom-4 left-4 right-4">
-                            <span className={`block text-2xl font-black uppercase text-white drop-shadow-md ${selectedCategoryId === cat.id ? 'text-brand-yellow' : 'group-hover:text-brand-yellow'} transition-colors`}>
-                                {language === 'ar' ? cat.nameAr : cat.nameEn}
-                            </span>
+                         
+                         {/* Luxurious Shine Effect */}
+                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1.5s] ease-in-out"></div>
                          </div>
-                      </div>
+
+                         {/* Brutalist Label */}
+                         <div className="absolute inset-0 flex flex-col justify-between p-8">
+                            <div className="flex justify-between items-start overflow-hidden">
+                               <motion.span 
+                                 initial={{ y: 20, opacity: 0 }}
+                                 whileInView={{ y: 0, opacity: 1 }}
+                                 className="text-5xl font-black text-black/5 group-hover:text-black/20 transition-colors duration-500"
+                               >
+                                 0{index + 1}
+                               </motion.span>
+                               {selectedCategoryId === cat.id && (
+                                 <motion.div 
+                                   initial={{ scale: 0 }}
+                                   animate={{ scale: 1 }}
+                                   className="bg-black text-brand-yellow p-3 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]"
+                                 >
+                                   <Filter className="w-5 h-5" />
+                                 </motion.div>
+                               )}
+                            </div>
+
+                            <div className="relative z-10">
+                               <motion.div 
+                                  initial={{ x: -20, opacity: 0 }}
+                                  whileInView={{ x: 0, opacity: 1 }}
+                                  transition={{ delay: 0.2 + (index * 0.1) }}
+                                  className="bg-black text-white group-hover:bg-brand-yellow group-hover:text-black inline-block px-4 py-2 mb-3 transition-colors duration-500 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)]"
+                               >
+                                  <span className="text-[10px] font-black uppercase tracking-[0.4em]">
+                                    {language === 'ar' ? 'استعرض' : 'EXPLORE'}
+                                  </span>
+                               </motion.div>
+                               <div className="overflow-hidden">
+                                 <motion.h3 
+                                    className="text-4xl md:text-5xl font-black uppercase text-black leading-none tracking-tighter break-words bg-white group-hover:bg-brand-yellow inline-block px-3 py-1 transition-colors duration-500 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] group-hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.5)]"
+                                 >
+                                     {language === 'ar' ? cat.nameAr : cat.nameEn}
+                                 </motion.h3>
+                               </div>
+                            </div>
+                         </div>
+
+                         {/* Hover Overlay Line */}
+                         <div className="absolute bottom-0 left-0 w-full h-0 bg-brand-yellow group-hover:h-3 transition-all duration-500 ease-[0.25, 1, 0.5, 1]"></div>
+                      </motion.div>
                   ))}
                </div>
            )}

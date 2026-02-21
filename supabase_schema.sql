@@ -6,6 +6,23 @@ DROP TABLE IF EXISTS public.products CASCADE;
 DROP TABLE IF EXISTS public.baladiyas CASCADE;
 DROP TABLE IF EXISTS public.wilayas CASCADE;
 DROP TABLE IF EXISTS public.categories CASCADE;
+DROP TABLE IF EXISTS public.settings CASCADE;
+
+-- 0. Create table for Site Settings
+CREATE TABLE public.settings (
+    id SERIAL PRIMARY KEY,
+    site_name VARCHAR(255) NOT NULL DEFAULT 'YourTshirtDZ',
+    site_logo TEXT,
+    favicon TEXT,
+    about_description_ar TEXT,
+    about_description_en TEXT,
+    phone_number VARCHAR(50),
+    about_logo TEXT,
+    store_location_url TEXT,
+    instagram_url TEXT,
+    facebook_url TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
 -- 1. Create table for Wilayas
 CREATE TABLE public.wilayas (
@@ -105,6 +122,7 @@ ALTER TABLE public.product_variants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wilayas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.baladiyas ENABLE ROW LEVEL SECURITY;
 
+CREATE POLICY "Public read settings" ON public.settings FOR SELECT USING (true);
 CREATE POLICY "Public read products" ON public.products FOR SELECT USING (true);
 CREATE POLICY "Public read categories" ON public.categories FOR SELECT USING (true);
 CREATE POLICY "Public read variants" ON public.product_variants FOR SELECT USING (true);
@@ -116,6 +134,10 @@ CREATE POLICY "Public insert order items" ON public.order_items FOR INSERT WITH 
 -- =============================================
 -- DATA POPULATION
 -- =============================================
+
+-- 0. Insert Settings
+INSERT INTO public.settings (id, site_name, site_logo, favicon, about_description_ar, about_description_en, phone_number, about_logo, store_location_url, instagram_url, facebook_url) VALUES
+(1, 'YourTshirtDZ', 'https://dua3y4qmf.cloudinary.com/image/upload/v1740065401/PinDown.io_conrable_1771477496_p3z7m5.jpg', 'https://dua3y4qmf.cloudinary.com/image/upload/v1740065401/PinDown.io_conrable_1771477496_p3z7m5.jpg', 'انطلق متجر YourTshirtDZ في عام 2026 بمهمة بسيطة: تقديم ملابس ستريت وير أصلية وعالية الجودة للشباب الجزائري. نحن نؤمن بالتصاميم الجريئة، والأقمشة الفاخرة، والنهج الذي يضع المجتمع أولاً. من شوارع الجزائر العاصمة إلى كل ولاية، نحن نمثل الموجة الجديدة للموضة الجزائرية.', 'YourTshirtDZ started in 2026 with a simple mission: to bring authentic, high-quality streetwear to the Algerian youth. We believe in bold designs, premium fabrics, and a community-first approach. From the streets of Algiers to every Wilaya, we represent the new wave of Algerian fashion.', '0550 00 00 00', 'https://dua3y4qmf.cloudinary.com/image/upload/v1740065401/PinDown.io_conrable_1771477496_p3z7m5.jpg', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d102313.25140660686!2d3.00331455!3d36.733818!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128fb2164279044b%3A0xb0064248f691eeeb!2sAlgiers!5e0!3m2!1sen!2sdz!4v1708460000000!5m2!1sen!2sdz', 'https://instagram.com/yourtshirtdz', 'https://facebook.com/yourtshirtdz');
 
 -- 1. Insert Categories
 INSERT INTO public.categories (id, name_ar, name_en, image_url) VALUES

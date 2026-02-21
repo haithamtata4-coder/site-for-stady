@@ -10,6 +10,7 @@ import CartDrawer from './components/CartDrawer';
 import { Product, CartItem, Category } from './types';
 import { Facebook, Instagram, Twitter, Loader2 } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { supabase } from './lib/supabase';
 
 function AppContent() {
@@ -18,7 +19,8 @@ function AppContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { settings } = useSettings();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -152,9 +154,11 @@ function AppContent() {
         <footer className="bg-black text-white py-12">
           <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <h3 className="text-2xl font-black mb-4">YourTshirt<span className="text-brand-yellow">DZ2</span></h3>
+              <h3 className="text-2xl font-black mb-4">
+                {settings?.siteName.split('DZ')[0] || 'YourTshirt'}<span className="text-brand-yellow">DZ</span>
+              </h3>
               <p className="text-gray-400 max-w-sm">
-                {t('aboutText')}
+                {language === 'ar' ? settings?.aboutDescriptionAr : settings?.aboutDescriptionEn || t('aboutText')}
               </p>
             </div>
             <div>
@@ -191,8 +195,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
+    <SettingsProvider>
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
+    </SettingsProvider>
   );
 }

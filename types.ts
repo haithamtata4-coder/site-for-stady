@@ -52,6 +52,20 @@ export interface BaladiyaData {
   nameEn?: string;
 }
 
+export interface SiteSettings {
+  id: number;
+  siteName: string;
+  siteLogo: string;
+  favicon: string;
+  aboutDescriptionAr: string;
+  aboutDescriptionEn: string;
+  phoneNumber: string;
+  aboutLogo: string;
+  storeLocationUrl: string; // Google Maps Embed URL
+  instagramUrl: string;
+  facebookUrl: string;
+}
+
 export interface OrderFormState {
   firstName: string;
   lastName: string;

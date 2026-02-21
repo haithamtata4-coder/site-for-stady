@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 import { LOGO_URL } from '../constants';
 import { MapPin, Clock, Phone, Instagram } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 const About = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { settings } = useSettings();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -28,14 +30,14 @@ const About = () => {
             {/* Brand Story */}
             <div className="flex flex-col md:flex-row gap-12 items-center mb-16">
                 <div className="w-full md:w-1/3 flex justify-center">
-                    <img src={LOGO_URL} alt="Logo" className="w-64 h-64 object-cover rounded-full border-4 border-brand-yellow shadow-xl" />
+                    <img src={settings?.aboutLogo || settings?.siteLogo || LOGO_URL} alt="Logo" className="w-64 h-64 object-cover rounded-full border-4 border-brand-yellow shadow-xl" />
                 </div>
                 <div className="w-full md:w-2/3">
                     <h2 className="text-4xl font-black uppercase mb-6 flex items-center gap-3">
                         <span className="bg-brand-yellow px-2 text-black">WHO</span> WE ARE
                     </h2>
                     <p className="text-lg text-gray-700 leading-relaxed font-medium mb-6 text-justify">
-                        {t('aboutStoryText')}
+                        {language === 'ar' ? settings?.aboutDescriptionAr : settings?.aboutDescriptionEn || t('aboutStoryText')}
                     </p>
                     <div className="flex gap-4">
                         <div className="bg-black text-white px-6 py-8 text-center flex-1 border-b-4 border-brand-yellow">
@@ -59,21 +61,28 @@ const About = () => {
                         {t('visitUs')}
                     </h3>
                     <div className="relative w-full h-80 bg-gray-200 border-2 border-black group overflow-hidden">
-                         {/* Fake Map Image - Using Unsplash for a city map vibe */}
-                        <img 
-                            src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&q=80&w=1000" 
-                            alt="Map" 
-                            className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-500"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="bg-brand-yellow border-2 border-black p-3 animate-bounce shadow-lg">
-                                <MapPin className="w-8 h-8 text-black" />
-                            </div>
-                        </div>
-                        <div className="absolute bottom-0 inset-x-0 bg-white/95 border-t-2 border-black p-4 font-bold text-sm backdrop-blur-sm">
-                            <p className="uppercase tracking-wide">123 Streetwear Blvd,</p>
-                            <p className="text-gray-600">Sidi Yahia, Algiers, Algeria</p>
-                        </div>
+                        {settings?.storeLocationUrl ? (
+                            <iframe 
+                                src={settings.storeLocationUrl}
+                                className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500"
+                                allowFullScreen={true}
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                            ></iframe>
+                        ) : (
+                            <>
+                                <img 
+                                    src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&q=80&w=1000" 
+                                    alt="Map" 
+                                    className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-500"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="bg-brand-yellow border-2 border-black p-3 animate-bounce shadow-lg">
+                                        <MapPin className="w-8 h-8 text-black" />
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -98,7 +107,9 @@ const About = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-black uppercase text-lg">{t('phone')}</h4>
-                                    <p className="text-gray-600 font-medium font-mono text-lg ltr:text-left rtl:text-right" dir="ltr">+213 555 123 456</p>
+                                    <p className="text-gray-600 font-medium font-mono text-lg ltr:text-left rtl:text-right" dir="ltr">
+                                        {settings?.phoneNumber || '+213 555 123 456'}
+                                    </p>
                                 </div>
                             </li>
                              <li className="flex items-start gap-4 group">
@@ -107,7 +118,21 @@ const About = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-black uppercase text-lg">Social Media</h4>
-                                    <a href="#" className="text-gray-600 font-medium hover:text-brand-yellow hover:bg-black hover:px-2 transition-all">@YourTshirtDZ2</a>
+                                    <div className="flex flex-col gap-1">
+                                        {settings?.instagramUrl && (
+                                            <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-gray-600 font-medium hover:text-brand-yellow hover:bg-black hover:px-2 transition-all">
+                                                Instagram
+                                            </a>
+                                        )}
+                                        {settings?.facebookUrl && (
+                                            <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-gray-600 font-medium hover:text-brand-yellow hover:bg-black hover:px-2 transition-all">
+                                                Facebook
+                                            </a>
+                                        )}
+                                        {!settings?.instagramUrl && !settings?.facebookUrl && (
+                                            <a href="#" className="text-gray-600 font-medium hover:text-brand-yellow hover:bg-black hover:px-2 transition-all">@YourTshirtDZ</a>
+                                        )}
+                                    </div>
                                 </div>
                             </li>
                         </ul>

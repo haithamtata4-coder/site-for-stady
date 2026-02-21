@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, Menu, Search, Globe } from 'lucide-react';
 import { LOGO_URL } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface NavbarProps {
   cartCount: number;
@@ -11,6 +12,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ cartCount, onOpenCart }) => {
   const { t, language, setLanguage } = useLanguage();
+  const { settings } = useSettings();
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'ar' : 'en');
@@ -31,9 +33,9 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, onOpenCart }) => {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center justify-center md:justify-start flex-1 md:flex-none">
             <Link to="/" className="flex items-center gap-2">
-              <img src={LOGO_URL} alt="YourTshirtDZ2" className="h-12 w-12 rounded-full object-cover border-2 border-brand-yellow" />
+              <img src={settings?.siteLogo || LOGO_URL} alt={settings?.siteName || "YourTshirtDZ"} className="h-12 w-12 rounded-full object-cover border-2 border-brand-yellow" />
               <span className="font-black text-xl tracking-tighter uppercase hidden sm:block">
-                YourTshirt<span className="text-brand-yellow">DZ2</span>
+                {(settings?.siteName || 'YourTshirtDZ').split('DZ')[0]}<span className="text-brand-yellow">DZ</span>
               </span>
             </Link>
           </div>

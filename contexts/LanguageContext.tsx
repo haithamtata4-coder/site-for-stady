@@ -20,7 +20,7 @@ const translations: Translations = {
   // Home Hero
   heroBadge: { en: "EST. 2026", ar: "تأسس 2026" },
   heroTitle1: { en: "YourTshirt", ar: "YourTshirt" },
-  heroTitle2: { en: "DZ2", ar: "DZ2" },
+  heroTitle2: { en: "DZ", ar: "DZ" },
   heroDesc: { en: "Redefine your style with our exclusive 2026 streetwear collection. Bold, authentic, and made for the streets of Algeria.", ar: "أعد تعريف أسلوبك مع تشكيلة ستريت وير 2026 الحصرية. جريئة، أصلية، ومصممة لشوارع الجزائر." },
   shopNow: { en: "EXPLORE DROP", ar: "اكتشف المجموعة" },
   marqueeText: { en: "• NEW COLLECTION 2026 • STREETWEAR • ALGERIA • LIMITED EDITION • FREE SHIPPING 58 WILAYAS", ar: "• تشكيلة جديدة 2026 • ستريت وير • الجزائر • إصدار محدود • توصيل 58 ولاية" },
@@ -86,12 +86,12 @@ const translations: Translations = {
   aboutUs: { en: "About Us", ar: "من نحن" },
   deliveryPolicy: { en: "Delivery Policy", ar: "سياسة التوصيل" },
   faq: { en: "FAQ", ar: "الأسئلة الشائعة" },
-  rights: { en: "© 2026 YourTshirtDZ2. All rights reserved.", ar: "© 2026 YourTshirtDZ2. جميع الحقوق محفوظة." },
+  rights: { en: "© 2026 YourTshirtDZ. All rights reserved.", ar: "© 2026 YourTshirtDZ. جميع الحقوق محفوظة." },
 
   // About Page
   aboutStoryText: { 
-    en: "YourTshirtDZ2 started in 2026 with a simple mission: to bring authentic, high-quality streetwear to the Algerian youth. We believe in bold designs, premium fabrics, and a community-first approach. From the streets of Algiers to every Wilaya, we represent the new wave of Algerian fashion.", 
-    ar: "انطلق متجر YourTshirtDZ2 في عام 2026 بمهمة بسيطة: تقديم ملابس ستريت وير أصلية وعالية الجودة للشباب الجزائري. نحن نؤمن بالتصاميم الجريئة، والأقمشة الفاخرة، والنهج الذي يضع المجتمع أولاً. من شوارع الجزائر العاصمة إلى كل ولاية، نحن نمثل الموجة الجديدة للموضة الجزائرية." 
+    en: "YourTshirtDZ started in 2026 with a simple mission: to bring authentic, high-quality streetwear to the Algerian youth. We believe in bold designs, premium fabrics, and a community-first approach. From the streets of Algiers to every Wilaya, we represent the new wave of Algerian fashion.", 
+    ar: "انطلق متجر YourTshirtDZ في عام 2026 بمهمة بسيطة: تقديم ملابس ستريت وير أصلية وعالية الجودة للشباب الجزائري. نحن نؤمن بالتصاميم الجريئة، والأقمشة الفاخرة، والنهج الذي يضع المجتمع أولاً. من شوارع الجزائر العاصمة إلى كل ولاية، نحن نمثل الموجة الجديدة للموضة الجزائرية." 
   },
   visitUs: { en: "Visit Our Store", ar: "قم بزيارة متجرنا" },
   contactInfo: { en: "Contact Information", ar: "معلومات الاتصال" },
